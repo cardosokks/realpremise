@@ -16,89 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  if (mobileMenuBtn) {
+  if (mobileMenuBtn && navLinks) {
     mobileMenuBtn.addEventListener('click', () => {
       navLinks.classList.toggle('active');
     });
-  }
 
-  // 2. Budget Simulator / Calculator Logic
-  const typeOptions = document.querySelectorAll('.type-option');
-  const extraCheckboxes = document.querySelectorAll('.calc-extras-list input[type="checkbox"]');
-  const priceDisplay = document.getElementById('calc-total-price');
-  const calcSummaryItems = document.getElementById('calc-summary-list');
-  const calcWhatsappBtn = document.getElementById('calc-whatsapp-btn');
-
-  let basePrices = {
-    'landing-page': { name: 'Landing Page de Alta Conversão', price: 990 },
-    'institucional': { name: 'Site Institucional Completo', price: 1790 },
-    'ecommerce': { name: 'Loja Virtual / E-commerce', price: 2890 }
-  };
-
-  let selectedType = 'landing-page';
-
-  function updateCalculator() {
-    let currentBase = basePrices[selectedType];
-    let total = currentBase.price;
-    let selectedExtras = [];
-
-    // Clear list
-    calcSummaryItems.innerHTML = '';
-
-    // Add base item to list
-    const baseLi = document.createElement('li');
-    baseLi.innerHTML = `<span>${currentBase.name}</span><strong>R$ ${currentBase.price.toLocaleString('pt-BR')}</strong>`;
-    calcSummaryItems.appendChild(baseLi);
-
-    // Add selected extras
-    extraCheckboxes.forEach(cb => {
-      if (cb.checked) {
-        let price = parseInt(cb.dataset.price, 10);
-        let name = cb.dataset.name;
-        total += price;
-        selectedExtras.push(name);
-
-        const extraLi = document.createElement('li');
-        extraLi.innerHTML = `<span>+ ${name}</span><strong>R$ ${price.toLocaleString('pt-BR')}</strong>`;
-        calcSummaryItems.appendChild(extraLi);
-      }
+    // Close mobile nav when clicking a link
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
     });
-
-    // Animate Price Number Change
-    priceDisplay.textContent = `R$ ${total.toLocaleString('pt-BR')}`;
-
-    // Generate WhatsApp Link with pre-filled message
-    let whatsappPhone = '5511999999999'; // Default contact number placeholder
-    let messageText = `Olá Real Premise! Montei uma simulação de site no seu simulador:\n\n`;
-    messageText += `📌 *Tipo de Projeto:* ${currentBase.name}\n`;
-    if (selectedExtras.length > 0) {
-      messageText += `✨ *Recursos Extras:* ${selectedExtras.join(', ')}\n`;
-    }
-    messageText += `💰 *Estimativa Total:* R$ ${total.toLocaleString('pt-BR')}\n\nGostaria de agendar o projeto e alinhar os detalhes!`;
-
-    let encodedMsg = encodeURIComponent(messageText);
-    calcWhatsappBtn.href = `https://wa.me/${whatsappPhone}?text=${encodedMsg}`;
   }
 
-  typeOptions.forEach(opt => {
-    opt.addEventListener('click', () => {
-      typeOptions.forEach(o => o.classList.remove('active'));
-      opt.classList.add('active');
-      selectedType = opt.dataset.type;
-      updateCalculator();
-    });
-  });
-
-  extraCheckboxes.forEach(cb => {
-    cb.addEventListener('change', updateCalculator);
-  });
-
-  // Initialize calculator
-  if (priceDisplay) {
-    updateCalculator();
-  }
-
-  // 3. Portfolio Filters
+  // 2. Portfolio Filters
   const tabBtns = document.querySelectorAll('.portfolio-tabs .tab-btn');
   const portfolioItems = document.querySelectorAll('.portfolio-item');
 
@@ -119,21 +50,132 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // 3. Scroll Reveal Animation Observer
+  const revealElements = document.querySelectorAll('.reveal-on-scroll');
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target); // Animate once
+        }
+      });
+    }, {
+      threshold: 0.15,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+  } else {
+    // Fallback for older devices
+    revealElements.forEach(el => el.classList.add('is-visible'));
+  }
+
   // 4. FAQ Accordion Logic
   const faqItems = document.querySelectorAll('.faq-item');
 
   faqItems.forEach(item => {
     const question = item.querySelector('.faq-question');
-    question.addEventListener('click', () => {
-      const isActive = item.classList.contains('active');
+    if (question) {
+      question.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
 
-      // Close all items
-      faqItems.forEach(i => i.classList.remove('active'));
+        // Close all items
+        faqItems.forEach(i => i.classList.remove('active'));
 
-      // If clicked item wasn't active, open it
-      if (!isActive) {
-        item.classList.add('active');
+        // If clicked item wasn't active, open it
+        if (!isActive) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+
+  // 5. High-Precision 3D Physics Tilt & Specular Glare Tracking
+  const card3d = document.querySelector('.hub-3d-platform');
+  const specularGlare = document.getElementById('specularGlare');
+  const heroVisualContainer = document.querySelector('.hero-visual');
+  const n8nCounter = document.getElementById('n8nCounter');
+
+  if (card3d && heroVisualContainer) {
+    let targetX = 6;
+    let targetY = -8;
+    let currentX = 6;
+    let currentY = -8;
+    let isHovered = false;
+
+    // Physics Lerp Loop
+    function animate3dTilt() {
+      // Smooth interpolation (linear interpolation / lerp dampening)
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
+
+      let scale = isHovered ? 1.03 : 1;
+      card3d.style.transform = `rotateX(${currentX.toFixed(2)}deg) rotateY(${currentY.toFixed(2)}deg) scale(${scale})`;
+
+      requestAnimationFrame(animate3dTilt);
+    }
+    animate3dTilt();
+
+    // Mouse Tracking
+    heroVisualContainer.addEventListener('mousemove', (e) => {
+      isHovered = true;
+      const rect = heroVisualContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      targetX = -(y / (rect.height / 2)) * 14;
+      targetY = (x / (rect.width / 2)) * 16;
+
+      if (specularGlare) {
+        let glareX = (x / rect.width) * 100 + 50;
+        let glareY = (y / rect.height) * 100 + 50;
+        specularGlare.style.transform = `translate(${glareX}px, ${glareY}px)`;
+        specularGlare.style.opacity = '0.85';
       }
     });
-  });
+
+    heroVisualContainer.addEventListener('mouseleave', () => {
+      isHovered = false;
+      targetX = 6;
+      targetY = -8;
+      if (specularGlare) {
+        specularGlare.style.opacity = '0.4';
+      }
+    });
+
+    // Android Touch Support with Lerp
+    heroVisualContainer.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        isHovered = true;
+        const touch = e.touches[0];
+        const rect = heroVisualContainer.getBoundingClientRect();
+        const x = touch.clientX - rect.left - rect.width / 2;
+        const y = touch.clientY - rect.top - rect.height / 2;
+
+        targetX = -(y / (rect.height / 2)) * 12;
+        targetY = (x / (rect.width / 2)) * 14;
+      }
+    }, { passive: true });
+
+    heroVisualContainer.addEventListener('touchend', () => {
+      isHovered = false;
+      targetX = 6;
+      targetY = -8;
+    });
+  }
+
+  // 6. Real-time Simulated Live Lead Counter
+  if (n8nCounter) {
+    let leadCount = 1482;
+    setInterval(() => {
+      leadCount += 1;
+      n8nCounter.textContent = `+${leadCount.toLocaleString('pt-BR')} Leads`;
+      n8nCounter.style.transform = 'scale(1.18)';
+      n8nCounter.style.transition = 'transform 0.2s ease';
+      setTimeout(() => {
+        n8nCounter.style.transform = 'scale(1)';
+      }, 200);
+    }, 4500);
+  }
 });
